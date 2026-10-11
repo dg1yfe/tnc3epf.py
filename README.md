@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/logo.svg" alt="tnc3epf logo" width="200"></p>
+
 # tnc3epf
 
 [Deutsch](#deutsch) · [English](#english)

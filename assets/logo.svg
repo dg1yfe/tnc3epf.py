@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <title>tnc3epf emblem</title>
+  <!-- badge: ink rim, aluminium ring, ink field -->
+  <circle cx="128" cy="128" r="126" fill="#14202B"/>
+  <circle cx="128" cy="128" r="120" fill="#CBD3DB"/>
+  <circle cx="128" cy="128" r="114" fill="#14202B"/>
+  <!-- python: body follows the badge ring, then rears over the chip -->
+  <path d="M45.3 158.1 A88 88 0 0 1 143.3 41.3 C166 43 178 58 175 78" fill="none" stroke="#2FA36B" stroke-width="18" stroke-linecap="round"/>
+  <path d="M45.3 158.1 A88 88 0 0 1 143.3 41.3" fill="none" stroke="#14202B" stroke-width="6" stroke-dasharray="7 13" stroke-linecap="round" opacity="0.55"/>
+  <!-- DIL flash chip -->
+  <g fill="#CBD3DB">
+    <rect x="84" y="140" width="88" height="22" rx="4"/>
+    <rect x="90.2" y="131" width="8" height="9" rx="1.5"/>
+    <rect x="90.2" y="162" width="8" height="9" rx="1.5"/>
+    <rect x="103.7" y="131" width="8" height="9" rx="1.5"/>
+    <rect x="103.7" y="162" width="8" height="9" rx="1.5"/>
+    <rect x="117.2" y="131" width="8" height="9" rx="1.5"/>
+    <rect x="117.2" y="162" width="8" height="9" rx="1.5"/>
+    <rect x="130.8" y="131" width="8" height="9" rx="1.5"/>
+    <rect x="130.8" y="162" width="8" height="9" rx="1.5"/>
+    <rect x="144.3" y="131" width="8" height="9" rx="1.5"/>
+    <rect x="144.3" y="162" width="8" height="9" rx="1.5"/>
+    <rect x="157.8" y="131" width="8" height="9" rx="1.5"/>
+    <rect x="157.8" y="162" width="8" height="9" rx="1.5"/>
+  </g>
+  <circle cx="84" cy="151" r="7" fill="#14202B"/>
+  <!-- lightning bolt in place of the forked tongue -->
+  <path transform="translate(172 106) rotate(24) scale(0.88) translate(-12 0)" d="M0 0 L24 0 L14 26 L30 26 L4 66 L10 36 L-6 36 Z" fill="#FFA41B" stroke="#14202B" stroke-width="3" stroke-linejoin="round"/>
+  <!-- python head, seen from above -->
+  <g transform="translate(175 78) rotate(95)">
+    <path d="M-2 -8 C6 -9 9 -13.5 18 -13.5 C31 -13.5 40 -7 40 0 C40 7 31 13.5 18 13.5 C9 13.5 6 9 -2 8 Z" fill="#2FA36B"/>
+    <circle cx="23" cy="-6.5" r="3" fill="#14202B"/><circle cx="23" cy="6.5" r="3" fill="#14202B"/>
+  </g>
+  <!-- TNC3-style front panel: screws, PWR LED, two port LED groups, name plate -->
+  <rect x="50" y="176" width="156" height="34" rx="4" fill="#CBD3DB"/>
+  <g fill="#14202B">
+    <circle cx="55" cy="181" r="2"/><circle cx="201" cy="181" r="2"/>
+    <circle cx="55" cy="205" r="2"/><circle cx="201" cy="205" r="2"/>
+  </g>
+  <circle cx="64" cy="199" r="2.6" fill="#2FA36B"/>
+  <rect x="74" y="183" width="24" height="24" rx="2" fill="none" stroke="#14202B" stroke-width="1.6"/>
+  <circle cx="81" cy="190" r="3" fill="#2FA36B"/><circle cx="91" cy="190" r="3" fill="#FFA41B"/>
+  <circle cx="81" cy="200" r="3" fill="#FFA41B"/><circle cx="91" cy="200" r="3" fill="#2FA36B"/>
+  <rect x="158" y="183" width="24" height="24" rx="2" fill="none" stroke="#14202B" stroke-width="1.6"/>
+  <circle cx="165" cy="190" r="3" fill="#2FA36B"/><circle cx="175" cy="190" r="3" fill="#FFA41B"/>
+  <circle cx="165" cy="200" r="3" fill="#FFA41B"/><circle cx="175" cy="200" r="3" fill="#2FA36B"/>
+  <g transform="translate(101.65 197)" fill="none" stroke="#14202B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path transform="translate(0 0)" d="M1.5 -8.5V-2A2 2 0 0 0 3.5 0H4.5M0 -6H4.5"/>
+    <path transform="translate(7.4 0)" d="M0 0V-6M0 -3A3 3 0 0 1 6 -3V0"/>
+    <path transform="translate(15.8 0)" d="M5.6 -4.5A3 3 0 1 0 5.6 -1.5"/>
+    <path transform="translate(23.4 0)" d="M0.5 -8.5H5.5L2.6 -5.3H3A2.65 2.65 0 1 1 0.6 -1.2"/>
+    <path transform="translate(31.4 0)" d="M0.1 -3H5.9A2.9 2.9 0 1 0 5.05 -0.95"/>
+    <path transform="translate(39.7 0)" d="M0 3V-6M0 -3A3 3 0 1 1 6 -3A3 3 0 1 1 0 -3"/>
+    <path transform="translate(48.1 0)" d="M1.5 0V-6.5A2 2 0 0 1 3.5 -8.5H4.6M0 -6H4.2"/>
+  </g>
+</svg>
