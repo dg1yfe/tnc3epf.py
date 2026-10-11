@@ -12,6 +12,7 @@ CASES = {
     'no_reloc': ['-r', 'TEST.APL'],
     'ext_rules': ['-v', 'BIG.APL', 'X.TAR.APL', 'B.DAT'],
     'getopt_errors': ['-x', '-vf', '1', '-f2', 'B.DAT'],
+    'sym_ties': ['TIES.APL'],
 }
 
 
@@ -54,6 +55,11 @@ def make_inputs(d):
     files['BIG.APL'] = prg(bytes(text), data, 0x100, syms,
                            [0, 0x200, 0x3FC, 0x400, 0x404])
     files['X.TAR.APL'] = files['TEST.APL']                             # ext "TAR.APL"
+    # 40 symbols with many equal (class, value) keys: the order of ties
+    # depends on the exact qsort algorithm of the original
+    syms = [(b'S%02d' % i, (0xA200, 0xA400, 0xA100, 0xA000)[i % 4], (i * 7) % 5 * 2)
+            for i in range(40)]
+    files['TIES.APL'] = prg(bytes(16), bytes(8), 0x10, syms, [])
     for name, content in files.items():
         p = os.path.join(d, name)
         with open(p, 'wb') as f:

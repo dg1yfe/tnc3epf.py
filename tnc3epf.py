@@ -2,7 +2,9 @@
 """tnc3epf.py - build flash-disk images for the Symek TNC3.
 
 Portable re-implementation of winepf.exe ("EPFILE2"). Output is byte-identical
-to the original, including its quirks; see FORMAT.md.
+to the original, including its quirks, except for the default start address
+(0x208000 instead of 0x206000) and the file times, which the original gets
+wrong by an hour for part of the year; see FORMAT.md.
 
     tnc3epf.py [-<opt>] { file }
     opt:   v verbose
@@ -23,7 +25,8 @@ ENTRY_HDR = 0x20            # flash-disk directory entry
 NAME_FIELD = 0x14           # bytes strcpy'd into before the mtime field
 NAME_MAX = 13               # firmware limit (name[14], NUL-terminated)
 MAGIC = b'Jimy'
-DEFAULT_ADDR = 0x206000
+DEFAULT_ADDR = 0x208000     # winepf.exe: 0x206000, unusable with Mini OS 3.12
+ORIGINAL_DEFAULT_ADDR = 0x206000
 DATA_BASE = 0x800           # data/bss of relocated programs live in RAM here
 OPTSTRING = 'rRsSvVhf:F:'
 
@@ -111,6 +114,68 @@ class GetOpt:
             self.optarg = argv[self.optind]
             self.optind += 1
         return c
+
+
+def msvc_qsort(a, cmp):
+    """In-place qsort exactly as in the Visual C++ 6 runtime the original
+    was linked with. It is not stable, so symbols with equal keys must end up
+    in the same order as there."""
+    def shortsort(lo, hi):
+        while hi > lo:
+            mx = lo
+            for p in range(lo + 1, hi + 1):
+                if cmp(a[p], a[mx]) > 0:
+                    mx = p
+            a[mx], a[hi] = a[hi], a[mx]
+            hi -= 1
+
+    if len(a) < 2:
+        return
+    stack = []
+    lo, hi = 0, len(a) - 1
+    while True:
+        if hi - lo + 1 <= 8:
+            shortsort(lo, hi)
+        else:
+            mid = lo + (hi - lo + 1) // 2
+            a[mid], a[lo] = a[lo], a[mid]
+            loguy, higuy = lo, hi + 1
+            while True:
+                loguy += 1
+                while loguy <= hi and cmp(a[loguy], a[lo]) <= 0:
+                    loguy += 1
+                higuy -= 1
+                while higuy > lo and cmp(a[higuy], a[lo]) >= 0:
+                    higuy -= 1
+                if higuy < loguy:
+                    break
+                a[loguy], a[higuy] = a[higuy], a[loguy]
+            a[lo], a[higuy] = a[higuy], a[lo]
+            # recurse into the smaller part, push the larger one
+            if higuy - lo > hi - loguy:     # (higuy-1-lo >= hi-loguy) in bytes
+                if lo + 1 < higuy:
+                    stack.append((lo, higuy - 1))
+                if loguy < hi:
+                    lo = loguy
+                    continue
+            else:
+                if loguy < hi:
+                    stack.append((loguy, hi))
+                if lo + 1 < higuy:
+                    hi = higuy - 1
+                    continue
+        if not stack:
+            return
+        lo, hi = stack.pop()
+
+
+def sym_compare(s1, s2):
+    """Order of the .SYM listing: symbol class (type & 0x700), then value."""
+    c1, c2 = s1[8] & 7, s2[8] & 7
+    if c1 != c2:
+        return 1 if c1 > c2 else -1
+    v1, v2 = be32(s1, 10), be32(s2, 10)
+    return -1 if v1 < v2 else int(v1 != v2)
 
 
 def basename(path):
@@ -206,7 +271,7 @@ class ImageBuilder:
                 v += load
             put32(buf, o + 10, v)
             syms.append(bytes(buf[o:o + 14]))
-        syms.sort(key=lambda s: (s[8] & 7, be32(s, 10)))
+        msvc_qsort(syms, sym_compare)
         buf[symtab:end] = b''.join(syms)
         try:
             sf = open(sym_filename(path), 'w', encoding='latin-1', newline='\r\n')

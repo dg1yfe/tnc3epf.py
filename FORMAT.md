@@ -1,6 +1,6 @@
 # TNC3 flash-disk image format
 
-This describes what `winepf.exe` (EPFILE2) writes, and therefore what `tnc3epf.py` writes. It was reconstructed from the original binary and checked against the TNC3 firmware. Numbers are hexadecimal where they start with `0x`; multi-byte values are big-endian (68000 byte order).
+This describes what `winepf.exe` (EPFILE2) writes, and therefore what `tnc3epf.py` writes. It was reconstructed from the original binary and checked against the TNC3 firmware (Mini OS 3.12 of 15 March 2003). `tnc3epf.py` differs from the original in two deliberate points, its default start address and the file times (§6). Numbers are hexadecimal where they start with `0x`; multi-byte values are big-endian (68000 byte order).
 
 ## 1. Command-line behaviour
 
@@ -9,7 +9,7 @@ This describes what `winepf.exe` (EPFILE2) writes, and therefore what `tnc3epf.p
   - An option that takes an argument must not be combined with others and must be followed by a space. Otherwise `getopt` reports `option must not be clustered` or `option must be followed by white space`.
   - Option parsing stops at the first argument that isn't an option. Everything after it is treated as a file name.
 - `-f <hex>` is parsed like C `strtol(…, 16)`. It sets the flash address of the first entry and changes the output base name from `FILE` to `FLASH`.
-- The default start address is `0x206000`; relocation is on by default.
+- The original's default start address is `0x206000`; `tnc3epf.py` uses `0x208000` (see §2). Relocation is on by default.
 - Files are processed in the order they are given.
 - Outputs go to the current directory:
   - `EP<base>.ABS`: the image, always written.
@@ -30,7 +30,18 @@ entry = header (0x20 bytes) + data, padded to an even length
 next  = entry + 0x20 + ((size + 1) & ~1)
 ```
 
-The firmware version examined searches for the first entry at 16 KiB boundaries from `0x208000` up to (not including) `0x300000`. From there it follows the chain as shown above. The start address passed with `-f` must therefore be one of those boundaries. The default `0x206000` is not.
+### Where the image goes
+
+The flash starts at `0x200000`. Mini OS 3.12 keeps the operating system in the first 32 KiB: its OS update (`flash -o`) only accepts images of 16–32 KiB. The flash disk follows directly behind:
+
+- When the TNC writes a complete image itself (`flashdisk_program_image`), it places it at offset `0x8000` rounded up to the flash chip's sector size. That is `0x208000` for sectors of up to 32 KiB, and `0x210000` for 64 KiB sectors.
+- To find the flash disk, the firmware looks for the first entry at 16 KiB boundaries from `0x208000` up to (not including) `0x300000`, then follows the chain as shown above.
+
+Programs are relocated to their final address, so the image must be built for the address it will be written to: `-f 208000` (the default of `tnc3epf.py`) or `-f 210000`, depending on the chip.
+
+The original's default of `0x206000` can't work with this OS. Mini OS 3.12 itself occupies `0x200000`–`0x206F71`, and `0x206000` isn't on the 16 KiB grid. The default probably dates from the tool's origins. Its messages use the Atari ST character set and it calls itself EPFILE**2**, so it looks like a port of an older Atari tool, possibly for EPROM-based units with a smaller OS. The output name `EPFILE` and the EPROM split `-s` also point that way. The Windows build itself is from October 2003, seven months after this OS.
+
+The TNC can also add `.APL` files to the flash disk itself (`flash -a`). It relocates them exactly as described in §3 and writes the same entries.
 
 ### Entry header (0x20 bytes)
 
@@ -55,7 +66,7 @@ Addresses used:
 
 ```
 load  = entry address + 0x20 + 0x24     # where the text starts in flash
-dbase = 0x800                           # data segment in RAM (fixed)
+dbase = 0x800                           # data segment in RAM (fixed; the firmware's default too)
 bbase = 0x800 + dlen                    # bss follows data
 ```
 
@@ -86,7 +97,7 @@ The adjustments add up when several bits are set. The table is sorted by `(type 
 \t%-12s %-8s %8lx %04x\n       name, CONST|BSS|TEXT|DATA|?, value, type
 ```
 
-The original sorts with C `qsort`, which isn't stable. Symbols with the same class and value can therefore appear in a different order there.
+The original sorts with the C `qsort` of Visual C++ 6, which isn't stable. `tnc3epf.py` uses the same algorithm, so symbols with the same class and value come out in the same order as in the original.
 
 ### Data written to the image
 
@@ -115,11 +126,18 @@ The original keeps the entry header and the data buffer in static memory and reu
 - **Name residue.** The file name is copied with `strcpy`. When a name is shorter than the previous one, the old name's remaining bytes stay behind the terminating NUL.
 - **Padding byte.** For an odd size, the padding byte is the buffer byte right after the data. That is left over from an earlier, larger file, `0` if there was none, or for an `.APL` the first byte of its own symbol or relocation table.
 
-The modification time comes from the Windows C runtime and matches the file's Unix mtime, apart from possible differences around daylight-saving changes.
+### File times (not reproduced)
+
+The original takes the file time from the Visual C++ runtime's `_findfirst`. It converts the time to local time using the UTC offset that applies **today**, then back to UTC using the daylight-saving state of the **file's date**. When the two differ, the stored time is one hour off: run during summer time, files dated in winter get one hour added; run in winter, summer-dated files lose one. The original's output therefore depends on the season in which it runs.
+
+`tnc3epf.py` stores the file's actual modification time (seconds since 1970, UTC).
 
 ## 6. Deliberate differences in tnc3epf.py
 
-These only affect messages on stderr, or cases where the original would crash or write undefined data:
+- **Default start address** `0x208000` instead of `0x206000`, which is unusable with Mini OS 3.12 (§2). The output files are still called `EPFILE.*` when `-f` isn't given.
+- **File times** are the actual modification times; the original is one hour off for part of the year (§5).
+
+The remaining differences only affect messages on stderr, or cases where the original would crash or write undefined data:
 - Missing files and directories are reported as warnings; the original skipped them silently or crashed.
 - File names longer than 13 characters get a warning, because the firmware can't handle them.
 - Messages use proper `ß` and `ö`.

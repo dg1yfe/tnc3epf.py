@@ -2,6 +2,10 @@
 """Regenerate tests/fixtures from the original winepf.exe (needs wine).
 
     tests/make_fixtures.py path/to/winepf.exe
+
+The original converts file times with the daylight-saving state of the day
+it runs on (see FORMAT.md). The inputs are dated in summer (tests/inputs.py),
+so run this during summer time, or the fixtures get times one hour off.
 """
 import os
 import re
