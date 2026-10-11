@@ -43,10 +43,19 @@ Platzhalter (`*`, `?`) expandiert das Programm selbst, wenn die Shell es nicht t
 
 #### Wahl der Startadresse
 
-Das Image muss für die Adresse gebaut werden, an der es im Flash landet, weil die Programme auf diese Adresse reloziert werden. Mini OS 3.12 belegt die ersten 32 KiB des Flash (ab `0x200000`). Die Flash-Disk beginnt dahinter, an `0x8000` aufgerundet auf die Sektorgröße des Flash-Bausteins:
+Das Image muss für die Adresse gebaut werden, an der es im Flash landet, weil die Programme auf diese Adresse reloziert werden. Die Adresse hängt vom Gerät und von den Flash-Bausteinen ab:
 
-- `208000` (Standard) für Bausteine mit Sektoren bis 32 KiB,
-- `-f 210000` für Bausteine mit 64-KiB-Sektoren.
+| Gerät | Busbreite | Flash-Typ | `-f` | Flash gesamt |
+|---|---|---|---|---|
+| TNC31 | 8 Bit | AM29F010 | `208000` | 128 KB |
+| TNC31 | 8 Bit | AM29F040 | `210000` | 512 KB |
+| TNC3 | 16 Bit | AM29F010 | `208000` | 256 KB |
+| TNC3 | 16 Bit | AM29F040 | `220000` | 1 MB |
+| TNC4 | 16 Bit | AM29F040 | `820000` | 1 MB |
+
+`208000` ist der Standard, `-f` kann dann entfallen. Die Regel dahinter: Das Betriebssystem belegt die ersten 32 KiB des Flash, und die Flash-Disk beginnt an der nächsten Grenze eines Löschsektors. Ein Löschsektor ist beim AM29F010 16 KiB und beim AM29F040 64 KiB groß, bei 16 Bit Busbreite (zwei Bausteine) jeweils doppelt so groß. Der Flash beginnt beim TNC3/TNC31 an `0x200000`, beim TNC4 an `0x800000`.
+
+Alle Dateien für die Flash-Disk gehören in einen Aufruf, zum Beispiel `python3 tnc3epf.py -v -f 220000 *.APL *.NET *.XTS *.XTP`. Nur `.APL`-Dateien werden reloziert, alle anderen werden unverändert übernommen.
 
 Das Original verwendet ohne `-f` die Adresse `0x206000`. Die passt nicht zu Mini OS 3.12, weil das Betriebssystem selbst bis `0x206F71` reicht. Vermutlich stammt der Wert aus der Zeit eines älteren, kleineren Betriebssystems. Deshalb ist der Standard von `tnc3epf.py` `0x208000`. Einzelne `.APL`-Dateien kann der TNC3 übrigens auch selbst mit `flash -a` in die Flash-Disk aufnehmen.
 
@@ -113,10 +122,19 @@ Wildcards are expanded by the program itself if the shell doesn't do it (for exa
 
 #### Choosing the start address
 
-The image must be built for the address it will be written to, because the programs are relocated to that address. Mini OS 3.12 occupies the first 32 KiB of the flash (from `0x200000`). The flash disk starts behind it, at `0x8000` rounded up to the flash chip's sector size:
+The image must be built for the address it will be written to, because the programs are relocated to that address. The address depends on the unit and its flash chips:
 
-- `208000` (the default) for chips with sectors of up to 32 KiB,
-- `-f 210000` for chips with 64 KiB sectors.
+| Unit | Bus width | Flash type | `-f` | Total flash |
+|---|---|---|---|---|
+| TNC31 | 8 bit | AM29F010 | `208000` | 128 KB |
+| TNC31 | 8 bit | AM29F040 | `210000` | 512 KB |
+| TNC3 | 16 bit | AM29F010 | `208000` | 256 KB |
+| TNC3 | 16 bit | AM29F040 | `220000` | 1 MB |
+| TNC4 | 16 bit | AM29F040 | `820000` | 1 MB |
+
+`208000` is the default, so `-f` can be left out there. The rule behind the table: the operating system occupies the first 32 KiB of the flash, and the flash disk starts at the next erase-sector boundary. An erase sector is 16 KiB on the AM29F010 and 64 KiB on the AM29F040, twice that with a 16-bit bus (two chips). The flash starts at `0x200000` on the TNC3/TNC31 and at `0x800000` on the TNC4.
+
+Pass all files for the flash disk in one call, for example `python3 tnc3epf.py -v -f 220000 *.APL *.NET *.XTS *.XTP`. Only `.APL` files are relocated; all others are copied unchanged.
 
 Without `-f`, the original uses `0x206000`. That doesn't fit Mini OS 3.12, whose own code reaches up to `0x206F71`; the value probably dates from an older, smaller OS. That's why `tnc3epf.py` defaults to `0x208000`. The TNC3 can also add single `.APL` files to its flash disk itself, with `flash -a`.
 

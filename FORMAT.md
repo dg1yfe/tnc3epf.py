@@ -34,10 +34,20 @@ next  = entry + 0x20 + ((size + 1) & ~1)
 
 The flash starts at `0x200000`. Mini OS 3.12 keeps the operating system in the first 32 KiB: its OS update (`flash -o`) only accepts images of 16–32 KiB. The flash disk follows directly behind:
 
-- When the TNC writes a complete image itself (`flashdisk_program_image`), it places it at offset `0x8000` rounded up to the flash chip's sector size. That is `0x208000` for sectors of up to 32 KiB, and `0x210000` for 64 KiB sectors.
+- When the TNC writes a complete image itself (`flashdisk_program_image`), it places it at offset `0x8000` rounded up to the size of one erase sector. With two chips on a 16-bit bus, both erase together, so the erase sector is twice the chip's sector size.
 - To find the flash disk, the firmware looks for the first entry at 16 KiB boundaries from `0x208000` up to (not including) `0x300000`, then follows the chain as shown above.
 
-Programs are relocated to their final address, so the image must be built for the address it will be written to: `-f 208000` (the default of `tnc3epf.py`) or `-f 210000`, depending on the chip.
+Programs are relocated to their final address, so the image must be built for the address it will be written to. The documented addresses for the different units follow exactly this rule:
+
+| Unit | Bus width | Flash | Erase sector | Flash base | Address (`-f`) |
+|---|---|---|---|---|---|
+| TNC31 | 8 bit | 1 × AM29F010 (128 KB) | 16 KiB | `0x200000` | `208000` |
+| TNC31 | 8 bit | 1 × AM29F040 (512 KB) | 64 KiB | `0x200000` | `210000` |
+| TNC3 | 16 bit | 2 × AM29F010 (256 KB) | 32 KiB | `0x200000` | `208000` |
+| TNC3 | 16 bit | 2 × AM29F040 (1 MB) | 128 KiB | `0x200000` | `220000` |
+| TNC4 | 16 bit | 2 × AM29F040 (1 MB) | 128 KiB | `0x800000` | `820000` |
+
+`tnc3epf.py` defaults to `208000`. The TNC4 row comes from that documentation only; no TNC4 firmware was examined.
 
 The original's default of `0x206000` can't work with this OS. Mini OS 3.12 itself occupies `0x200000`–`0x206F71`, and `0x206000` isn't on the 16 KiB grid. The default probably dates from the tool's origins. Its messages use the Atari ST character set and it calls itself EPFILE**2**, so it looks like a port of an older Atari tool, possibly for EPROM-based units with a smaller OS. The output name `EPFILE` and the EPROM split `-s` also point that way. The Windows build itself is from October 2003, seven months after this OS.
 
