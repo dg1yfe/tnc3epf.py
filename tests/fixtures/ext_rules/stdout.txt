@@ -1,0 +1,7 @@
+EPFILE2
+
+BIG.APL                           1072 Bytes
+X.TAR.APL                          104 Bytes
+B.DAT                                5 Bytes
+
+2064fe OK

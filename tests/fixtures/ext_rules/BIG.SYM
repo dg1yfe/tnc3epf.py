@@ -1,0 +1,8 @@
+	Symbol       Typ      Wert    
+
+	K            CONST        1234 a000
+	heap         BSS           80c a100
+	main         TEXT       206044 a200
+	aa           TEXT       206054 a200
+	tab          TEXT       206244 a200
+	zz           DATA          804 a400

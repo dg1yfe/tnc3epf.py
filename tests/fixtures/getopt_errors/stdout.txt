@@ -1,0 +1,17 @@
+winepf.exe: illegal option -- x
+epfile [-<opt>] { file }
+opt:   v verbose
+       r don't relocate
+       f <hex> TNC3 Flash-EPROMs
+       s split output
+winepf.exe: option must not be clustered -- f
+epfile [-<opt>] { file }
+opt:   v verbose
+       r don't relocate
+       f <hex> TNC3 Flash-EPROMs
+       s split output
+EPFILE2
+
+B.DAT                                5 Bytes
+
+206026 OK

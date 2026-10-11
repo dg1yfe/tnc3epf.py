@@ -1,0 +1,7 @@
+EPFILE2
+
+LONGNAME.TXT                        49 Bytes
+TEST.APL                            60 Bytes
+B.DAT                                5 Bytes
+
+2060d4 OK

@@ -1,0 +1,2 @@
+# reference outputs of the original tool must stay byte-exact (CRLF in .SYM)
+tests/fixtures/** binary

@@ -1,0 +1,5 @@
+	Symbol       Typ      Wert    
+
+	bvar         BSS           80c a100
+	start        TEXT       21a06a a200
+	dvar         DATA          800 a400
